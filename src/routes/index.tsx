@@ -33,6 +33,11 @@ function Index() {
 function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-primary px-4 py-24 sm:py-32">
+      {/* Hero background image */}
+      <div className="absolute inset-0">
+        <img src={heroImage} alt="" className="h-full w-full object-cover opacity-20" width={1920} height={1080} />
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/80 via-primary/90 to-primary" />
+      </div>
       {/* Decorative elements */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
