@@ -14,16 +14,118 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      content: {
+        Row: {
+          category: Database["public"]["Enums"]["content_category"]
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at: string
+          description: string | null
+          file_path: string
+          file_url: string | null
+          id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["content_status"]
+          title: string
+          updated_at: string
+          user_id: string
+          visibility: Database["public"]["Enums"]["content_visibility"]
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["content_category"]
+          content_type: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_url?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+          visibility?: Database["public"]["Enums"]["content_visibility"]
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["content_category"]
+          content_type?: Database["public"]["Enums"]["content_type"]
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_url?: string | null
+          id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["content_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+          visibility?: Database["public"]["Enums"]["content_visibility"]
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "member"
+      content_category: "event" | "practice" | "performance" | "tour" | "other"
+      content_status: "pending" | "approved" | "rejected"
+      content_type: "photo" | "music" | "video"
+      content_visibility: "public" | "members_only"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +252,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "member"],
+      content_category: ["event", "practice", "performance", "tour", "other"],
+      content_status: ["pending", "approved", "rejected"],
+      content_type: ["photo", "music", "video"],
+      content_visibility: ["public", "members_only"],
+    },
   },
 } as const
