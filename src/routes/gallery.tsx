@@ -23,7 +23,7 @@ function GalleryPage() {
   const [content, setContent] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "music" | "video">("all");
-  const [category, setCategory] = useState<string>("all");
+  const [category, setCategory] = useState<"all" | "event" | "practice" | "performance" | "tour" | "other">("all");
 
   useEffect(() => {
     async function fetchContent() {
