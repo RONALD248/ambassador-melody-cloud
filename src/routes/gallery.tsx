@@ -48,7 +48,7 @@ function GalleryPage() {
     fetchContent();
   }, [filter, category]);
 
-  const categories = ["all", "event", "practice", "performance", "tour", "other"];
+  const categories: Array<"all" | "event" | "practice" | "performance" | "tour" | "other"> = ["all", "event", "practice", "performance", "tour", "other"];
 
   return (
     <div className="flex min-h-screen flex-col">
