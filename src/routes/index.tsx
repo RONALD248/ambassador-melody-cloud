@@ -4,6 +4,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Music, Upload, Image, Play, Users, Shield, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
+import heroImage from "@/assets/hero-choir.jpg";
 
 export const Route = createFileRoute("/")({
   component: Index,
