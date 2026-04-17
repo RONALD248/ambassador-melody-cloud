@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 function NotFoundComponent() {
   return (
@@ -36,6 +37,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0a1733" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "AmbassadorsCloud" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
       { name: "description", content: "Digital platform for the JKUSDA Ambassadors Choir community. Share music, photos, and videos." },
       { property: "og:title", content: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
@@ -44,6 +49,10 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+      { rel: "icon", type: "image/png", sizes: "512x512", href: "/icon-512.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -68,6 +77,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
+      <InstallAppButton variant="banner" />
       <Outlet />
       <Toaster />
     </AuthProvider>
