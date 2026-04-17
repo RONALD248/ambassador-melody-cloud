@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          location: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_date: string
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          location?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -126,6 +162,7 @@ export type Database = {
       content_status: "pending" | "approved" | "rejected"
       content_type: "photo" | "music" | "video"
       content_visibility: "public" | "members_only"
+      event_type: "practice" | "performance" | "tour" | "meeting" | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -258,6 +295,7 @@ export const Constants = {
       content_status: ["pending", "approved", "rejected"],
       content_type: ["photo", "music", "video"],
       content_visibility: ["public", "members_only"],
+      event_type: ["practice", "performance", "tour", "meeting", "other"],
     },
   },
 } as const
