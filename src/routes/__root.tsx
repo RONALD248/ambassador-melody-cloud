@@ -4,6 +4,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "@/components/ui/sonner";
+import { InstallAppButton } from "@/components/InstallAppButton";
 
 function NotFoundComponent() {
   return (
@@ -76,6 +77,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   return (
     <AuthProvider>
+      <InstallAppButton variant="banner" />
       <Outlet />
       <Toaster />
     </AuthProvider>
