@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Music, Menu, X, Shield, Upload, Image, User, LogOut } from "lucide-react";
+import { Music, Menu, X, Shield, Upload, Image, User, LogOut, Calendar } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -12,6 +12,7 @@ export function Header() {
   const navLinks = [
     { to: "/" as const, label: "Home" },
     { to: "/gallery" as const, label: "Media Gallery" },
+    { to: "/events" as const, label: "Events", icon: Calendar },
   ];
 
   const authLinks = isAuthenticated
@@ -55,10 +56,10 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           {isAuthenticated ? (
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-sm">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">{profile?.display_name || "Member"}</span>
-              </div>
+              <Link to="/profile" className="flex items-center gap-2 rounded-md px-2 py-1 text-sm text-muted-foreground hover:bg-muted hover:text-foreground">
+                <User className="h-4 w-4" />
+                <span>{profile?.display_name || "Member"}</span>
+              </Link>
               <Button variant="ghost" size="sm" onClick={logout}>
                 <LogOut className="h-4 w-4" />
               </Button>
