@@ -1,15 +1,27 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Music, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["content"]["Row"];
 
+const gallerySearchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  type: fallback(z.enum(["all", "music", "video"]), "all").default("all"),
+  category: fallback(
+    z.enum(["all", "event", "practice", "performance", "tour", "other"]),
+    "all",
+  ).default("all"),
+});
+
 export const Route = createFileRoute("/gallery")({
+  validateSearch: zodValidator(gallerySearchSchema),
   component: GalleryPage,
   head: () => ({
     meta: [
@@ -20,11 +32,10 @@ export const Route = createFileRoute("/gallery")({
 });
 
 function GalleryPage() {
+  const { q: search, type: filter, category } = Route.useSearch();
+  const navigate = useNavigate({ from: "/gallery" });
   const [content, setContent] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<"all" | "music" | "video">("all");
-  const [category, setCategory] = useState<"all" | "event" | "practice" | "performance" | "tour" | "other">("all");
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function fetchContent() {
@@ -49,7 +60,14 @@ function GalleryPage() {
     fetchContent();
   }, [filter, category]);
 
-  const categories = ["all", "event", "practice", "performance", "tour", "other"] as const;
+  const categories = ["all", "event", "performance", "practice", "tour", "other"] as const;
+
+  const setSearch = (v: string) =>
+    navigate({ search: (prev) => ({ ...prev, q: v }), replace: true });
+  const setFilter = (v: "all" | "music" | "video") =>
+    navigate({ search: (prev) => ({ ...prev, type: v }) });
+  const setCategory = (v: typeof category) =>
+    navigate({ search: (prev) => ({ ...prev, category: v }) });
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -118,12 +136,12 @@ function GalleryPage() {
 
           {/* Content Grid */}
           {(() => {
-            const q = search.trim().toLowerCase();
-            const filtered = q
+            const qq = search.trim().toLowerCase();
+            const filtered = qq
               ? content.filter(
                   (i) =>
-                    i.title.toLowerCase().includes(q) ||
-                    (i.description?.toLowerCase().includes(q) ?? false),
+                    i.title.toLowerCase().includes(qq) ||
+                    (i.description?.toLowerCase().includes(qq) ?? false),
                 )
               : content;
 
@@ -135,7 +153,7 @@ function GalleryPage() {
                 <div className="mt-16 text-center">
                   <Music className="mx-auto h-12 w-12 text-muted-foreground/30" />
                   <p className="mt-4 text-muted-foreground">
-                    {q || filter !== "all" || category !== "all"
+                    {qq || filter !== "all" || category !== "all"
                       ? "No results match your filters."
                       : "No content available yet. Check back soon!"}
                   </p>

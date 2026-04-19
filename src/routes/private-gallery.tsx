@@ -6,11 +6,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { Image, Download, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["content"]["Row"];
 
+const privateGallerySearchSchema = z.object({
+  q: fallback(z.string(), "").default(""),
+  category: fallback(
+    z.enum(["all", "event", "practice", "performance", "tour", "other"]),
+    "all",
+  ).default("all"),
+});
+
 export const Route = createFileRoute("/private-gallery")({
+  validateSearch: zodValidator(privateGallerySearchSchema),
   component: PrivateGalleryPage,
   head: () => ({
     meta: [{ title: "Photo Gallery — AmbassadorsCloud" }],
@@ -20,11 +31,15 @@ export const Route = createFileRoute("/private-gallery")({
 function PrivateGalleryPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const { q: search, category } = Route.useSearch();
   const [photos, setPhotos] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Content | null>(null);
-  const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<"all" | "event" | "practice" | "performance" | "tour" | "other">("all");
+
+  const setSearch = (v: string) =>
+    navigate({ to: "/private-gallery", search: (prev) => ({ ...prev, q: v }), replace: true });
+  const setCategory = (v: typeof category) =>
+    navigate({ to: "/private-gallery", search: (prev) => ({ ...prev, category: v }) });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate({ to: "/login" });
@@ -93,10 +108,10 @@ function PrivateGalleryPage() {
           </div>
 
           {(() => {
-            const q = search.trim().toLowerCase();
+            const qq = search.trim().toLowerCase();
             const filtered = photos.filter((p) => {
               if (category !== "all" && p.category !== category) return false;
-              if (q && !p.title.toLowerCase().includes(q) && !(p.description?.toLowerCase().includes(q) ?? false)) return false;
+              if (qq && !p.title.toLowerCase().includes(qq) && !(p.description?.toLowerCase().includes(qq) ?? false)) return false;
               return true;
             });
 
@@ -108,7 +123,7 @@ function PrivateGalleryPage() {
                 <div className="mt-12 text-center">
                   <Image className="mx-auto h-12 w-12 text-muted-foreground/30" />
                   <p className="mt-4 text-muted-foreground">
-                    {q || category !== "all" ? "No photos match your filters." : "No photos available yet."}
+                    {qq || category !== "all" ? "No photos match your filters." : "No photos available yet."}
                   </p>
                 </div>
               );
