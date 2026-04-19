@@ -36,10 +36,11 @@ function PrivateGalleryPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<Content | null>(null);
 
+  type PGSearch = z.infer<typeof privateGallerySearchSchema>;
   const setSearch = (v: string) =>
-    navigate({ to: "/private-gallery", search: (prev) => ({ ...prev, q: v }), replace: true });
+    navigate({ to: "/private-gallery", search: (prev: PGSearch) => ({ ...prev, q: v }), replace: true });
   const setCategory = (v: typeof category) =>
-    navigate({ to: "/private-gallery", search: (prev) => ({ ...prev, category: v }) });
+    navigate({ to: "/private-gallery", search: (prev: PGSearch) => ({ ...prev, category: v }) });
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate({ to: "/login" });
