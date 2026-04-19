@@ -3,8 +3,8 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Play, Music, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Music, Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import type { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["content"]["Row"];
@@ -24,6 +24,7 @@ function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "music" | "video">("all");
   const [category, setCategory] = useState<"all" | "event" | "practice" | "performance" | "tour" | "other">("all");
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     async function fetchContent() {
@@ -62,8 +63,31 @@ function GalleryPage() {
             </p>
           </div>
 
+          {/* Search */}
+          <div className="mx-auto mt-8 max-w-md">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search by title or description..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 pr-9"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Filters */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
             <div className="flex items-center gap-1 rounded-lg border border-border bg-card p-1">
               {(["all", "music", "video"] as const).map((f) => (
                 <button
@@ -93,20 +117,39 @@ function GalleryPage() {
           </div>
 
           {/* Content Grid */}
-          {loading ? (
-            <div className="mt-16 text-center text-muted-foreground">Loading…</div>
-          ) : content.length === 0 ? (
-            <div className="mt-16 text-center">
-              <Music className="mx-auto h-12 w-12 text-muted-foreground/30" />
-              <p className="mt-4 text-muted-foreground">No content available yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {content.map((item) => (
-                <ContentCard key={item.id} item={item} />
-              ))}
-            </div>
-          )}
+          {(() => {
+            const q = search.trim().toLowerCase();
+            const filtered = q
+              ? content.filter(
+                  (i) =>
+                    i.title.toLowerCase().includes(q) ||
+                    (i.description?.toLowerCase().includes(q) ?? false),
+                )
+              : content;
+
+            if (loading) {
+              return <div className="mt-16 text-center text-muted-foreground">Loading…</div>;
+            }
+            if (filtered.length === 0) {
+              return (
+                <div className="mt-16 text-center">
+                  <Music className="mx-auto h-12 w-12 text-muted-foreground/30" />
+                  <p className="mt-4 text-muted-foreground">
+                    {q || filter !== "all" || category !== "all"
+                      ? "No results match your filters."
+                      : "No content available yet. Check back soon!"}
+                  </p>
+                </div>
+              );
+            }
+            return (
+              <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filtered.map((item) => (
+                  <ContentCard key={item.id} item={item} />
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </main>
       <Footer />
