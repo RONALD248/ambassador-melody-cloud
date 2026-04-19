@@ -62,12 +62,13 @@ function GalleryPage() {
 
   const categories = ["all", "event", "performance", "practice", "tour", "other"] as const;
 
+  type GallerySearch = z.infer<typeof gallerySearchSchema>;
   const setSearch = (v: string) =>
-    navigate({ to: "/gallery", search: (prev) => ({ ...prev, q: v }), replace: true });
+    navigate({ to: "/gallery", search: (prev: GallerySearch) => ({ ...prev, q: v }), replace: true });
   const setFilter = (v: "all" | "music" | "video") =>
-    navigate({ to: "/gallery", search: (prev) => ({ ...prev, type: v }) });
+    navigate({ to: "/gallery", search: (prev: GallerySearch) => ({ ...prev, type: v }) });
   const setCategory = (v: typeof category) =>
-    navigate({ to: "/gallery", search: (prev) => ({ ...prev, category: v }) });
+    navigate({ to: "/gallery", search: (prev: GallerySearch) => ({ ...prev, category: v }) });
 
   return (
     <div className="flex min-h-screen flex-col">
