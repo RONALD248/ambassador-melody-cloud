@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { User, Shield, Mail } from "lucide-react";
+import { InstallPromptSettings } from "@/components/InstallAppButton";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -113,6 +114,10 @@ function ProfilePage() {
             >
               Sign out
             </Button>
+          </div>
+
+          <div className="mt-6">
+            <InstallPromptSettings />
           </div>
         </div>
       </main>
