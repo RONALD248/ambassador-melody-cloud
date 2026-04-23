@@ -10,9 +10,25 @@ type BIPEvent = Event & {
 const SNOOZE_KEY = "ac_install_snoozed_until";
 const NEVER_KEY = "ac_install_never";
 const VISITS_KEY = "ac_install_visits";
+const FORCE_KEY = "ac_install_force";
 const SNOOZE_DAYS = 7;
 const MIN_VISITS = 2;
 const SHOW_DELAY_MS = 8000;
+
+function isForced() {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem(FORCE_KEY) === "1") return true;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("forceInstall") === "1") {
+      localStorage.setItem(FORCE_KEY, "1");
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
 
 function isSnoozed() {
   if (typeof window === "undefined") return true;
@@ -40,23 +56,25 @@ export function InstallAppButton({ variant = "banner" }: { variant?: "banner" | 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const forced = isForced();
+
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-expect-error iOS only
       window.navigator.standalone === true;
-    if (standalone) {
+    if (standalone && !forced) {
       setInstalled(true);
       return;
     }
-    if (isSnoozed()) return;
+    if (!forced && isSnoozed()) return;
 
     const visits = bumpVisits();
     const ua = window.navigator.userAgent;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/.test(ua);
     const isIos = /iPad|iPhone|iPod/.test(ua) && !/CriOS|FxiOS/.test(ua);
 
-    // Only prompt on mobile, or after MIN_VISITS on desktop
-    if (!isMobile && visits < MIN_VISITS) return;
+    // Only prompt on mobile, or after MIN_VISITS on desktop (skip when forced)
+    if (!forced && !isMobile && visits < MIN_VISITS) return;
 
     const onPrompt = (e: Event) => {
       e.preventDefault();
@@ -70,10 +88,11 @@ export function InstallAppButton({ variant = "banner" }: { variant?: "banner" | 
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
-    if (isIos) setShowIos(true);
+    // In forced mode, show iOS-style instructions when no native prompt fires
+    if (isIos || forced) setShowIos(true);
 
-    // Delay UI so it doesn't appear immediately on landing
-    const t = window.setTimeout(() => setEligible(true), SHOW_DELAY_MS);
+    // Delay UI so it doesn't appear immediately on landing (instant when forced)
+    const t = window.setTimeout(() => setEligible(true), forced ? 0 : SHOW_DELAY_MS);
 
     return () => {
       window.clearTimeout(t);
@@ -166,11 +185,13 @@ export function InstallPromptSettings() {
   const [neverShow, setNeverShow] = useState(false);
   const [snoozedUntil, setSnoozedUntil] = useState<number>(0);
   const [installed, setInstalled] = useState(false);
+  const [forced, setForced] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setNeverShow(localStorage.getItem(NEVER_KEY) === "1");
     setSnoozedUntil(Number(localStorage.getItem(SNOOZE_KEY) || 0));
+    setForced(localStorage.getItem(FORCE_KEY) === "1");
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-expect-error iOS only
@@ -188,6 +209,21 @@ export function InstallPromptSettings() {
   function disableForever() {
     localStorage.setItem(NEVER_KEY, "1");
     setNeverShow(true);
+  }
+
+  function toggleForce() {
+    if (forced) {
+      localStorage.removeItem(FORCE_KEY);
+      setForced(false);
+    } else {
+      localStorage.setItem(FORCE_KEY, "1");
+      localStorage.removeItem(NEVER_KEY);
+      localStorage.removeItem(SNOOZE_KEY);
+      setForced(true);
+      setNeverShow(false);
+      setSnoozedUntil(0);
+    }
+    window.location.reload();
   }
 
   const snoozedActive = snoozedUntil > Date.now();
@@ -219,6 +255,19 @@ export function InstallPromptSettings() {
           )}
         </div>
       )}
+      <div className="mt-4 border-t border-border pt-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Developer / QA
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Force the install prompt UI to render regardless of platform, visit count, or snooze
+          state. Useful for QA on desktop browsers. Also enabled by appending{" "}
+          <code className="rounded bg-muted px-1 py-0.5">?forceInstall=1</code> to any URL.
+        </p>
+        <Button size="sm" variant={forced ? "default" : "outline"} onClick={toggleForce} className="mt-2">
+          {forced ? "Disable forced prompt" : "Force install prompt (QA)"}
+        </Button>
+      </div>
     </div>
   );
 }
