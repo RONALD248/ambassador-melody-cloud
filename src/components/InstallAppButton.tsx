@@ -56,23 +56,25 @@ export function InstallAppButton({ variant = "banner" }: { variant?: "banner" | 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const forced = isForced();
+
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-expect-error iOS only
       window.navigator.standalone === true;
-    if (standalone) {
+    if (standalone && !forced) {
       setInstalled(true);
       return;
     }
-    if (isSnoozed()) return;
+    if (!forced && isSnoozed()) return;
 
     const visits = bumpVisits();
     const ua = window.navigator.userAgent;
     const isMobile = /Android|iPhone|iPad|iPod|Mobile/.test(ua);
     const isIos = /iPad|iPhone|iPod/.test(ua) && !/CriOS|FxiOS/.test(ua);
 
-    // Only prompt on mobile, or after MIN_VISITS on desktop
-    if (!isMobile && visits < MIN_VISITS) return;
+    // Only prompt on mobile, or after MIN_VISITS on desktop (skip when forced)
+    if (!forced && !isMobile && visits < MIN_VISITS) return;
 
     const onPrompt = (e: Event) => {
       e.preventDefault();
@@ -86,10 +88,11 @@ export function InstallAppButton({ variant = "banner" }: { variant?: "banner" | 
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
 
-    if (isIos) setShowIos(true);
+    // In forced mode, show iOS-style instructions when no native prompt fires
+    if (isIos || forced) setShowIos(true);
 
-    // Delay UI so it doesn't appear immediately on landing
-    const t = window.setTimeout(() => setEligible(true), SHOW_DELAY_MS);
+    // Delay UI so it doesn't appear immediately on landing (instant when forced)
+    const t = window.setTimeout(() => setEligible(true), forced ? 0 : SHOW_DELAY_MS);
 
     return () => {
       window.clearTimeout(t);
