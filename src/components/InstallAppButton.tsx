@@ -10,9 +10,25 @@ type BIPEvent = Event & {
 const SNOOZE_KEY = "ac_install_snoozed_until";
 const NEVER_KEY = "ac_install_never";
 const VISITS_KEY = "ac_install_visits";
+const FORCE_KEY = "ac_install_force";
 const SNOOZE_DAYS = 7;
 const MIN_VISITS = 2;
 const SHOW_DELAY_MS = 8000;
+
+function isForced() {
+  if (typeof window === "undefined") return false;
+  if (localStorage.getItem(FORCE_KEY) === "1") return true;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("forceInstall") === "1") {
+      localStorage.setItem(FORCE_KEY, "1");
+      return true;
+    }
+  } catch {
+    // ignore
+  }
+  return false;
+}
 
 function isSnoozed() {
   if (typeof window === "undefined") return true;
