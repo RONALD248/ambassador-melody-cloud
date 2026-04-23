@@ -99,12 +99,31 @@ function UploadPage() {
     setError("");
 
     try {
-      // Upload file to storage
-      const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/${Date.now()}.${ext}`;
+      // Server-side bucket is public, so validate strictly client-side before upload.
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error("File is too large. Maximum allowed size is 50 MB.");
+      }
+
+      const allowedMimes = ALLOWED_MIME_BY_TYPE[contentType] ?? [];
+      const detectedMime = await detectMimeFromMagic(file);
+
+      if (!detectedMime || !allowedMimes.includes(detectedMime)) {
+        throw new Error(
+          `Invalid or unsupported file. Allowed for ${contentType}: ${allowedMimes.join(", ")}.`
+        );
+      }
+
+      // Normalise filename — never trust the client-supplied name/extension.
+      const safeExt = EXT_BY_MIME[detectedMime] ?? "bin";
+      const uuid =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const filePath = `${user.id}/${uuid}.${safeExt}`;
+
       const { error: uploadError } = await supabase.storage
         .from("media")
-        .upload(filePath, file);
+        .upload(filePath, file, { contentType: detectedMime, upsert: false });
 
       if (uploadError) throw uploadError;
 
