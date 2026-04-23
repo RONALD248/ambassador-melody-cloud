@@ -185,11 +185,13 @@ export function InstallPromptSettings() {
   const [neverShow, setNeverShow] = useState(false);
   const [snoozedUntil, setSnoozedUntil] = useState<number>(0);
   const [installed, setInstalled] = useState(false);
+  const [forced, setForced] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     setNeverShow(localStorage.getItem(NEVER_KEY) === "1");
     setSnoozedUntil(Number(localStorage.getItem(SNOOZE_KEY) || 0));
+    setForced(localStorage.getItem(FORCE_KEY) === "1");
     const standalone =
       window.matchMedia?.("(display-mode: standalone)").matches ||
       // @ts-expect-error iOS only
@@ -207,6 +209,21 @@ export function InstallPromptSettings() {
   function disableForever() {
     localStorage.setItem(NEVER_KEY, "1");
     setNeverShow(true);
+  }
+
+  function toggleForce() {
+    if (forced) {
+      localStorage.removeItem(FORCE_KEY);
+      setForced(false);
+    } else {
+      localStorage.setItem(FORCE_KEY, "1");
+      localStorage.removeItem(NEVER_KEY);
+      localStorage.removeItem(SNOOZE_KEY);
+      setForced(true);
+      setNeverShow(false);
+      setSnoozedUntil(0);
+    }
+    window.location.reload();
   }
 
   const snoozedActive = snoozedUntil > Date.now();
