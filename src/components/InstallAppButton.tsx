@@ -255,6 +255,19 @@ export function InstallPromptSettings() {
           )}
         </div>
       )}
+      <div className="mt-4 border-t border-border pt-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Developer / QA
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Force the install prompt UI to render regardless of platform, visit count, or snooze
+          state. Useful for QA on desktop browsers. Also enabled by appending{" "}
+          <code className="rounded bg-muted px-1 py-0.5">?forceInstall=1</code> to any URL.
+        </p>
+        <Button size="sm" variant={forced ? "default" : "outline"} onClick={toggleForce} className="mt-2">
+          {forced ? "Disable forced prompt" : "Force install prompt (QA)"}
+        </Button>
+      </div>
     </div>
   );
 }
