@@ -10,6 +10,59 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload as UploadIcon, CheckCircle } from "lucide-react";
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
+const ALLOWED_MIME_BY_TYPE: Record<string, string[]> = {
+  photo: ["image/jpeg", "image/png", "image/gif", "image/webp"],
+  music: ["audio/mpeg", "audio/ogg", "audio/mp4", "audio/wav", "audio/x-wav"],
+  video: ["video/mp4", "video/webm", "video/ogg"],
+};
+
+const EXT_BY_MIME: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/gif": "gif",
+  "image/webp": "webp",
+  "audio/mpeg": "mp3",
+  "audio/ogg": "ogg",
+  "audio/mp4": "m4a",
+  "audio/wav": "wav",
+  "audio/x-wav": "wav",
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/ogg": "ogv",
+};
+
+// Inspect magic bytes to verify file type matches the claimed MIME.
+async function detectMimeFromMagic(file: File): Promise<string | null> {
+  const buf = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const hex = Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const ascii = new TextDecoder("ascii", { fatal: false }).decode(buf);
+
+  // Images
+  if (hex.startsWith("ffd8ff")) return "image/jpeg";
+  if (hex.startsWith("89504e470d0a1a0a")) return "image/png";
+  if (hex.startsWith("47494638")) return "image/gif";
+  if (ascii.startsWith("RIFF") && ascii.includes("WEBP")) return "image/webp";
+  if (ascii.startsWith("RIFF") && ascii.includes("WAVE")) return "audio/wav";
+
+  // Audio
+  if (hex.startsWith("494433") || hex.startsWith("fffb") || hex.startsWith("fff3") || hex.startsWith("fff2")) return "audio/mpeg";
+  if (hex.startsWith("4f676753")) return "audio/ogg"; // OggS — also used for video/ogg
+
+  // MP4 / M4A / MOV family: bytes 4-7 = "ftyp"
+  if (buf.length >= 12 && ascii.substring(4, 8) === "ftyp") {
+    const brand = ascii.substring(8, 12);
+    if (["M4A ", "M4B ", "M4P "].includes(brand)) return "audio/mp4";
+    return "video/mp4";
+  }
+
+  // WebM / Matroska: EBML header 1A 45 DF A3
+  if (hex.startsWith("1a45dfa3")) return "video/webm";
+
+  return null;
+}
+
 export const Route = createFileRoute("/upload")({
   component: UploadPage,
   head: () => ({
@@ -46,12 +99,31 @@ function UploadPage() {
     setError("");
 
     try {
-      // Upload file to storage
-      const ext = file.name.split(".").pop();
-      const filePath = `${user.id}/${Date.now()}.${ext}`;
+      // Server-side bucket is public, so validate strictly client-side before upload.
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error("File is too large. Maximum allowed size is 50 MB.");
+      }
+
+      const allowedMimes = ALLOWED_MIME_BY_TYPE[contentType] ?? [];
+      const detectedMime = await detectMimeFromMagic(file);
+
+      if (!detectedMime || !allowedMimes.includes(detectedMime)) {
+        throw new Error(
+          `Invalid or unsupported file. Allowed for ${contentType}: ${allowedMimes.join(", ")}.`
+        );
+      }
+
+      // Normalise filename — never trust the client-supplied name/extension.
+      const safeExt = EXT_BY_MIME[detectedMime] ?? "bin";
+      const uuid =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      const filePath = `${user.id}/${uuid}.${safeExt}`;
+
       const { error: uploadError } = await supabase.storage
         .from("media")
-        .upload(filePath, file);
+        .upload(filePath, file, { contentType: detectedMime, upsert: false });
 
       if (uploadError) throw uploadError;
 
