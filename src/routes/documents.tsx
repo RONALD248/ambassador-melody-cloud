@@ -4,11 +4,28 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { FileText, Download, Search, X } from "lucide-react";
+import { FileText, Download, Search, X, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["content"]["Row"];
+
+function getExt(path: string): string {
+  const m = path.toLowerCase().match(/\.([a-z0-9]+)(?:\?|$)/);
+  return m ? m[1] : "";
+}
+
+type PreviewKind = "pdf" | "image" | "text" | "office" | "unsupported";
+
+function getPreviewKind(path: string): PreviewKind {
+  const ext = getExt(path);
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) return "image";
+  if (["txt", "md", "csv", "log", "json", "xml"].includes(ext)) return "text";
+  if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) return "office";
+  return "unsupported";
+}
 
 export const Route = createFileRoute("/documents")({
   component: DocumentsPage,
