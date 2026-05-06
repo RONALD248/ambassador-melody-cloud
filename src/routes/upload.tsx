@@ -127,8 +127,8 @@ function UploadPage() {
 
   if (isLoading || !isAuthenticated) return null;
 
-  // Auto-set visibility based on content type
-  const visibility = contentType === "photo" ? "members_only" : "public";
+  // Photos & documents: members only. Music & videos: public after approval.
+  const visibility = contentType === "photo" || contentType === "document" ? "members_only" : "public";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,13 +138,15 @@ function UploadPage() {
     setError("");
 
     try {
-      // Server-side bucket is public, so validate strictly client-side before upload.
       if (file.size > MAX_FILE_SIZE) {
         throw new Error("File is too large. Maximum allowed size is 50 MB.");
       }
 
       const allowedMimes = ALLOWED_MIME_BY_TYPE[contentType] ?? [];
-      const detectedMime = await detectMimeFromMagic(file);
+      let detectedMime = await detectMimeFromMagic(file);
+      if (contentType === "document") {
+        detectedMime = resolveDocumentMime(file, detectedMime);
+      }
 
       if (!detectedMime || !allowedMimes.includes(detectedMime)) {
         throw new Error(
