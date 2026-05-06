@@ -160,7 +160,7 @@ export type Database = {
       app_role: "admin" | "member"
       content_category: "event" | "practice" | "performance" | "tour" | "other"
       content_status: "pending" | "approved" | "rejected"
-      content_type: "photo" | "music" | "video"
+      content_type: "photo" | "music" | "video" | "document"
       content_visibility: "public" | "members_only"
       event_type: "practice" | "performance" | "tour" | "meeting" | "other"
     }
@@ -293,7 +293,7 @@ export const Constants = {
       app_role: ["admin", "member"],
       content_category: ["event", "practice", "performance", "tour", "other"],
       content_status: ["pending", "approved", "rejected"],
-      content_type: ["photo", "music", "video"],
+      content_type: ["photo", "music", "video", "document"],
       content_visibility: ["public", "members_only"],
       event_type: ["practice", "performance", "tour", "meeting", "other"],
     },
