@@ -167,6 +167,106 @@ function DocumentsPage() {
         </div>
       </main>
       <Footer />
+
+      <Dialog open={!!previewDoc} onOpenChange={(o) => !o && setPreviewDoc(null)}>
+        <DialogContent className="max-w-5xl p-0 sm:max-w-5xl">
+          {previewDoc && (
+            <div className="flex h-[85vh] flex-col">
+              <DialogHeader className="border-b border-border px-6 py-4">
+                <DialogTitle className="pr-8 text-left">{previewDoc.title}</DialogTitle>
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {previewDoc.category} · {new Date(previewDoc.created_at).toLocaleDateString()}
+                  </p>
+                  <a
+                    href={previewDoc.file_url || ""}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download
+                  </a>
+                </div>
+              </DialogHeader>
+              <div className="flex-1 overflow-hidden bg-muted">
+                <PreviewBody
+                  doc={previewDoc}
+                  textContent={textContent}
+                  textLoading={textLoading}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function PreviewBody({
+  doc,
+  textContent,
+  textLoading,
+}: {
+  doc: Content;
+  textContent: string | null;
+  textLoading: boolean;
+}) {
+  const url = doc.file_url || "";
+  const kind = getPreviewKind(doc.file_path || url);
+
+  if (!url) {
+    return <p className="p-6 text-center text-muted-foreground">File unavailable.</p>;
+  }
+
+  if (kind === "pdf") {
+    return <iframe src={url} title={doc.title} className="h-full w-full border-0" />;
+  }
+  if (kind === "image") {
+    return (
+      <div className="flex h-full w-full items-center justify-center overflow-auto bg-background p-4">
+        <img src={url} alt={doc.title} className="max-h-full max-w-full object-contain" />
+      </div>
+    );
+  }
+  if (kind === "text") {
+    if (textLoading) {
+      return <p className="p-6 text-center text-muted-foreground">Loading preview…</p>;
+    }
+    return (
+      <pre className="h-full w-full overflow-auto bg-background p-4 text-xs text-foreground">
+        {textContent}
+      </pre>
+    );
+  }
+  if (kind === "office") {
+    const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+    return (
+      <div className="flex h-full flex-col">
+        <p className="border-b border-border bg-background px-4 py-2 text-xs text-muted-foreground">
+          Preview powered by Microsoft Office Online. Requires the file to be publicly reachable. If
+          it doesn't load, please download instead.
+        </p>
+        <iframe src={officeUrl} title={doc.title} className="h-full w-full flex-1 border-0" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+      <FileText className="h-12 w-12 text-muted-foreground/40" />
+      <p className="text-muted-foreground">
+        Preview not supported for this file type. Please download to view.
+      </p>
+      <a
+        href={url}
+        download
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
+        <Download className="h-4 w-4" /> Download
+      </a>
     </div>
   );
 }
