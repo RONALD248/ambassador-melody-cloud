@@ -40,6 +40,25 @@ function DocumentsPage() {
   const [docs, setDocs] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [previewDoc, setPreviewDoc] = useState<Content | null>(null);
+  const [textContent, setTextContent] = useState<string | null>(null);
+  const [textLoading, setTextLoading] = useState(false);
+
+  useEffect(() => {
+    if (!previewDoc) {
+      setTextContent(null);
+      return;
+    }
+    const kind = getPreviewKind(previewDoc.file_path || previewDoc.file_url || "");
+    if (kind === "text" && previewDoc.file_url) {
+      setTextLoading(true);
+      fetch(previewDoc.file_url)
+        .then((r) => r.text())
+        .then((t) => setTextContent(t.slice(0, 200_000)))
+        .catch(() => setTextContent("Failed to load preview."))
+        .finally(() => setTextLoading(false));
+    }
+  }, [previewDoc]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate({ to: "/login" });
