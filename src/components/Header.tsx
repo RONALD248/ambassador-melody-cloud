@@ -1,7 +1,7 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Music, Menu, X, Shield, Upload, Image, User, LogOut, Calendar } from "lucide-react";
+import { Music, Menu, X, Shield, Upload, Image, User, LogOut, Calendar, FileText } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
@@ -20,6 +20,7 @@ export function Header() {
         { to: "/dashboard" as const, label: "Dashboard" },
         { to: "/upload" as const, label: "Upload", icon: Upload },
         { to: "/private-gallery" as const, label: "Photos", icon: Image },
+        { to: "/documents" as const, label: "Documents", icon: FileText },
         ...(isAdmin ? [{ to: "/admin" as const, label: "Admin", icon: Shield }] : []),
       ]
     : [];

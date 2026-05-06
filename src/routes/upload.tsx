@@ -16,6 +16,16 @@ const ALLOWED_MIME_BY_TYPE: Record<string, string[]> = {
   photo: ["image/jpeg", "image/png", "image/gif", "image/webp"],
   music: ["audio/mpeg", "audio/ogg", "audio/mp4", "audio/wav", "audio/x-wav"],
   video: ["video/mp4", "video/webm", "video/ogg"],
+  document: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain",
+  ],
 };
 
 const EXT_BY_MIME: Record<string, string> = {
@@ -31,6 +41,14 @@ const EXT_BY_MIME: Record<string, string> = {
   "video/mp4": "mp4",
   "video/webm": "webm",
   "video/ogg": "ogv",
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/vnd.ms-excel": "xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+  "text/plain": "txt",
 };
 
 // Inspect magic bytes to verify file type matches the claimed MIME.
@@ -60,6 +78,27 @@ async function detectMimeFromMagic(file: File): Promise<string | null> {
   // WebM / Matroska: EBML header 1A 45 DF A3
   if (hex.startsWith("1a45dfa3")) return "video/webm";
 
+  // Documents
+  if (hex.startsWith("25504446")) return "application/pdf"; // %PDF
+  if (hex.startsWith("504b0304") || hex.startsWith("504b0506") || hex.startsWith("504b0708")) {
+    return "application/zip-office";
+  }
+  if (hex.startsWith("d0cf11e0a1b11ae1")) return "application/x-ole";
+
+  return null;
+}
+
+function resolveDocumentMime(file: File, detected: string | null): string | null {
+  if (detected && detected !== "application/zip-office" && detected !== "application/x-ole") return detected;
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf")) return "application/pdf";
+  if (name.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (name.endsWith(".doc")) return "application/msword";
+  if (name.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  if (name.endsWith(".xls")) return "application/vnd.ms-excel";
+  if (name.endsWith(".pptx")) return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+  if (name.endsWith(".ppt")) return "application/vnd.ms-powerpoint";
+  if (name.endsWith(".txt")) return "text/plain";
   return null;
 }
 
@@ -88,8 +127,8 @@ function UploadPage() {
 
   if (isLoading || !isAuthenticated) return null;
 
-  // Auto-set visibility based on content type
-  const visibility = contentType === "photo" ? "members_only" : "public";
+  // Photos & documents: members only. Music & videos: public after approval.
+  const visibility = contentType === "photo" || contentType === "document" ? "members_only" : "public";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,13 +138,15 @@ function UploadPage() {
     setError("");
 
     try {
-      // Server-side bucket is public, so validate strictly client-side before upload.
       if (file.size > MAX_FILE_SIZE) {
         throw new Error("File is too large. Maximum allowed size is 50 MB.");
       }
 
       const allowedMimes = ALLOWED_MIME_BY_TYPE[contentType] ?? [];
-      const detectedMime = await detectMimeFromMagic(file);
+      let detectedMime = await detectMimeFromMagic(file);
+      if (contentType === "document") {
+        detectedMime = resolveDocumentMime(file, detectedMime);
+      }
 
       if (!detectedMime || !allowedMimes.includes(detectedMime)) {
         throw new Error(
@@ -187,9 +228,17 @@ function UploadPage() {
     { value: "photo", label: "Photo", accept: "image/*" },
     { value: "music", label: "Music", accept: "audio/*" },
     { value: "video", label: "Video", accept: "video/*" },
+    { value: "document", label: "Document", accept: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" },
   ];
 
   const currentAccept = contentTypes.find((t) => t.value === contentType)?.accept || "*/*";
+
+  const helpText =
+    contentType === "photo"
+      ? " Photos are visible to members only."
+      : contentType === "document"
+      ? " Documents are shared with members only after approval."
+      : " Music and videos are shared publicly after approval.";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -198,8 +247,8 @@ function UploadPage() {
         <div className="mx-auto max-w-lg">
           <h1 className="font-display text-2xl font-bold text-foreground">Upload Content</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Share photos, music, or videos with the choir community.
-            {contentType === "photo" ? " Photos are visible to members only." : " Music and videos are shared publicly after approval."}
+            Share photos, music, videos, or documents with the choir community.
+            {helpText}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
