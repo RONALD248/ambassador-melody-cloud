@@ -4,7 +4,7 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Image, Music, Play, Clock, CheckCircle, XCircle, Trash2 } from "lucide-react";
+import { Image, Music, Play, Clock, CheckCircle, XCircle, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -80,8 +80,10 @@ function MyUploadsPage() {
                       <Image className="h-5 w-5 text-primary" />
                     ) : item.content_type === "music" ? (
                       <Music className="h-5 w-5 text-accent" />
-                    ) : (
+                    ) : item.content_type === "video" ? (
                       <Play className="h-5 w-5 text-primary" />
+                    ) : (
+                      <FileText className="h-5 w-5 text-primary" />
                     )}
                     <div>
                       <p className="font-medium text-foreground">{item.title}</p>
