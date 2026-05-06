@@ -78,6 +78,27 @@ async function detectMimeFromMagic(file: File): Promise<string | null> {
   // WebM / Matroska: EBML header 1A 45 DF A3
   if (hex.startsWith("1a45dfa3")) return "video/webm";
 
+  // Documents
+  if (hex.startsWith("25504446")) return "application/pdf"; // %PDF
+  if (hex.startsWith("504b0304") || hex.startsWith("504b0506") || hex.startsWith("504b0708")) {
+    return "application/zip-office";
+  }
+  if (hex.startsWith("d0cf11e0a1b11ae1")) return "application/x-ole";
+
+  return null;
+}
+
+function resolveDocumentMime(file: File, detected: string | null): string | null {
+  if (detected && detected !== "application/zip-office" && detected !== "application/x-ole") return detected;
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf")) return "application/pdf";
+  if (name.endsWith(".docx")) return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  if (name.endsWith(".doc")) return "application/msword";
+  if (name.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  if (name.endsWith(".xls")) return "application/vnd.ms-excel";
+  if (name.endsWith(".pptx")) return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+  if (name.endsWith(".ppt")) return "application/vnd.ms-powerpoint";
+  if (name.endsWith(".txt")) return "text/plain";
   return null;
 }
 
