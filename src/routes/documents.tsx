@@ -4,11 +4,28 @@ import { Footer } from "@/components/Footer";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { FileText, Download, Search, X } from "lucide-react";
+import { FileText, Download, Search, X, Eye } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Database } from "@/integrations/supabase/types";
 
 type Content = Database["public"]["Tables"]["content"]["Row"];
+
+function getExt(path: string): string {
+  const m = path.toLowerCase().match(/\.([a-z0-9]+)(?:\?|$)/);
+  return m ? m[1] : "";
+}
+
+type PreviewKind = "pdf" | "image" | "text" | "office" | "unsupported";
+
+function getPreviewKind(path: string): PreviewKind {
+  const ext = getExt(path);
+  if (ext === "pdf") return "pdf";
+  if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) return "image";
+  if (["txt", "md", "csv", "log", "json", "xml"].includes(ext)) return "text";
+  if (["doc", "docx", "xls", "xlsx", "ppt", "pptx"].includes(ext)) return "office";
+  return "unsupported";
+}
 
 export const Route = createFileRoute("/documents")({
   component: DocumentsPage,
@@ -23,6 +40,25 @@ function DocumentsPage() {
   const [docs, setDocs] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [previewDoc, setPreviewDoc] = useState<Content | null>(null);
+  const [textContent, setTextContent] = useState<string | null>(null);
+  const [textLoading, setTextLoading] = useState(false);
+
+  useEffect(() => {
+    if (!previewDoc) {
+      setTextContent(null);
+      return;
+    }
+    const kind = getPreviewKind(previewDoc.file_path || previewDoc.file_url || "");
+    if (kind === "text" && previewDoc.file_url) {
+      setTextLoading(true);
+      fetch(previewDoc.file_url)
+        .then((r) => r.text())
+        .then((t) => setTextContent(t.slice(0, 200_000)))
+        .catch(() => setTextContent("Failed to load preview."))
+        .finally(() => setTextLoading(false));
+    }
+  }, [previewDoc]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) navigate({ to: "/login" });
@@ -106,15 +142,24 @@ function DocumentsPage() {
                       </p>
                     </div>
                   </div>
-                  <a
-                    href={d.file_url || ""}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Download className="h-4 w-4" /> Download
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc(d)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                    >
+                      <Eye className="h-4 w-4" /> Preview
+                    </button>
+                    <a
+                      href={d.file_url || ""}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Download className="h-4 w-4" /> Download
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
@@ -122,6 +167,106 @@ function DocumentsPage() {
         </div>
       </main>
       <Footer />
+
+      <Dialog open={!!previewDoc} onOpenChange={(o) => !o && setPreviewDoc(null)}>
+        <DialogContent className="max-w-5xl p-0 sm:max-w-5xl">
+          {previewDoc && (
+            <div className="flex h-[85vh] flex-col">
+              <DialogHeader className="border-b border-border px-6 py-4">
+                <DialogTitle className="pr-8 text-left">{previewDoc.title}</DialogTitle>
+                <div className="flex items-center justify-between gap-3 pt-1">
+                  <p className="text-xs text-muted-foreground capitalize">
+                    {previewDoc.category} · {new Date(previewDoc.created_at).toLocaleDateString()}
+                  </p>
+                  <a
+                    href={previewDoc.file_url || ""}
+                    download
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Download className="h-3.5 w-3.5" /> Download
+                  </a>
+                </div>
+              </DialogHeader>
+              <div className="flex-1 overflow-hidden bg-muted">
+                <PreviewBody
+                  doc={previewDoc}
+                  textContent={textContent}
+                  textLoading={textLoading}
+                />
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function PreviewBody({
+  doc,
+  textContent,
+  textLoading,
+}: {
+  doc: Content;
+  textContent: string | null;
+  textLoading: boolean;
+}) {
+  const url = doc.file_url || "";
+  const kind = getPreviewKind(doc.file_path || url);
+
+  if (!url) {
+    return <p className="p-6 text-center text-muted-foreground">File unavailable.</p>;
+  }
+
+  if (kind === "pdf") {
+    return <iframe src={url} title={doc.title} className="h-full w-full border-0" />;
+  }
+  if (kind === "image") {
+    return (
+      <div className="flex h-full w-full items-center justify-center overflow-auto bg-background p-4">
+        <img src={url} alt={doc.title} className="max-h-full max-w-full object-contain" />
+      </div>
+    );
+  }
+  if (kind === "text") {
+    if (textLoading) {
+      return <p className="p-6 text-center text-muted-foreground">Loading preview…</p>;
+    }
+    return (
+      <pre className="h-full w-full overflow-auto bg-background p-4 text-xs text-foreground">
+        {textContent}
+      </pre>
+    );
+  }
+  if (kind === "office") {
+    const officeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+    return (
+      <div className="flex h-full flex-col">
+        <p className="border-b border-border bg-background px-4 py-2 text-xs text-muted-foreground">
+          Preview powered by Microsoft Office Online. Requires the file to be publicly reachable. If
+          it doesn't load, please download instead.
+        </p>
+        <iframe src={officeUrl} title={doc.title} className="h-full w-full flex-1 border-0" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex h-full flex-col items-center justify-center gap-3 p-6 text-center">
+      <FileText className="h-12 w-12 text-muted-foreground/40" />
+      <p className="text-muted-foreground">
+        Preview not supported for this file type. Please download to view.
+      </p>
+      <a
+        href={url}
+        download
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+      >
+        <Download className="h-4 w-4" /> Download
+      </a>
     </div>
   );
 }
