@@ -3,7 +3,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
-import { Music, Search, X } from "lucide-react";
+import { Music, Search, X, Download } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -213,9 +213,20 @@ function ContentCard({ item }: { item: Content }) {
         {item.description && (
           <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
         )}
-        <p className="mt-2 text-xs text-muted-foreground">
-          {new Date(item.created_at).toLocaleDateString()}
-        </p>
+        <div className="mt-3 flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">
+            {new Date(item.created_at).toLocaleDateString()}
+          </p>
+          <a
+            href={item.file_url || ""}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent hover:text-accent-foreground"
+          >
+            <Download className="h-3.5 w-3.5" /> Download
+          </a>
+        </div>
       </div>
     </div>
   );
