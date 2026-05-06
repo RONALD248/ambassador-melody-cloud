@@ -16,6 +16,16 @@ const ALLOWED_MIME_BY_TYPE: Record<string, string[]> = {
   photo: ["image/jpeg", "image/png", "image/gif", "image/webp"],
   music: ["audio/mpeg", "audio/ogg", "audio/mp4", "audio/wav", "audio/x-wav"],
   video: ["video/mp4", "video/webm", "video/ogg"],
+  document: [
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/plain",
+  ],
 };
 
 const EXT_BY_MIME: Record<string, string> = {
@@ -31,6 +41,14 @@ const EXT_BY_MIME: Record<string, string> = {
   "video/mp4": "mp4",
   "video/webm": "webm",
   "video/ogg": "ogv",
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/vnd.ms-excel": "xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "application/vnd.ms-powerpoint": "ppt",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation": "pptx",
+  "text/plain": "txt",
 };
 
 // Inspect magic bytes to verify file type matches the claimed MIME.
