@@ -228,9 +228,17 @@ function UploadPage() {
     { value: "photo", label: "Photo", accept: "image/*" },
     { value: "music", label: "Music", accept: "audio/*" },
     { value: "video", label: "Video", accept: "video/*" },
+    { value: "document", label: "Document", accept: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt" },
   ];
 
   const currentAccept = contentTypes.find((t) => t.value === contentType)?.accept || "*/*";
+
+  const helpText =
+    contentType === "photo"
+      ? " Photos are visible to members only."
+      : contentType === "document"
+      ? " Documents are shared with members only after approval."
+      : " Music and videos are shared publicly after approval.";
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -239,8 +247,8 @@ function UploadPage() {
         <div className="mx-auto max-w-lg">
           <h1 className="font-display text-2xl font-bold text-foreground">Upload Content</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Share photos, music, or videos with the choir community.
-            {contentType === "photo" ? " Photos are visible to members only." : " Music and videos are shared publicly after approval."}
+            Share photos, music, videos, or documents with the choir community.
+            {helpText}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-5">
