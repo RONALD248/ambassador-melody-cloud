@@ -142,15 +142,24 @@ function DocumentsPage() {
                       </p>
                     </div>
                   </div>
-                  <a
-                    href={d.file_url || ""}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-                  >
-                    <Download className="h-4 w-4" /> Download
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc(d)}
+                      className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                    >
+                      <Eye className="h-4 w-4" /> Preview
+                    </button>
+                    <a
+                      href={d.file_url || ""}
+                      download
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                    >
+                      <Download className="h-4 w-4" /> Download
+                    </a>
+                  </div>
                 </div>
               ))}
             </div>
