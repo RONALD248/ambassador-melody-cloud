@@ -106,6 +106,7 @@ function DocumentsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-9"
+              aria-label="Search documents"
             />
             {search && (
               <button
