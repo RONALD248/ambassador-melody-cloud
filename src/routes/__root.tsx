@@ -55,6 +55,28 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/favicon.ico" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "JKUSDA Ambassadors Choir",
+              alternateName: "AmbassadorsCloud",
+              url: "https://ambassador-melody-cloud.lovable.app",
+              logo: "https://ambassador-melody-cloud.lovable.app/icon-512.png",
+            },
+            {
+              "@type": "WebSite",
+              name: "AmbassadorsCloud",
+              url: "https://ambassador-melody-cloud.lovable.app",
+            },
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
