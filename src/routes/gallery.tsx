@@ -152,6 +152,7 @@ function GalleryPage() {
             </div>
           </div>
 
+          <h2 className="sr-only">Performances</h2>
           {/* Content Grid */}
           {(() => {
             const qq = search.trim().toLowerCase();
