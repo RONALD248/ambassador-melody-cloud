@@ -120,8 +120,28 @@ function EventsPage() {
   const upcoming = events.filter((e) => new Date(e.event_date) >= now);
   const past = events.filter((e) => new Date(e.event_date) < now);
 
+  const eventsLd = upcoming.slice(0, 20).map((ev) => ({
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: ev.title,
+    startDate: new Date(ev.event_date).toISOString(),
+    eventStatus: "https://schema.org/EventScheduled",
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    location: ev.location
+      ? { "@type": "Place", name: ev.location }
+      : { "@type": "VirtualLocation", url: "https://ambassador-melody-cloud.lovable.app/events" },
+    description: ev.description || undefined,
+    organizer: { "@type": "Organization", name: "JKUSDA Ambassadors Choir" },
+  }));
+
   return (
     <div className="flex min-h-screen flex-col">
+      {eventsLd.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventsLd) }}
+        />
+      )}
       <Header />
       <main className="flex-1 px-4 py-8">
         <div className="mx-auto max-w-5xl">
