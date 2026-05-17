@@ -27,6 +27,22 @@ export const Route = createFileRoute("/gallery")({
     meta: [
       { title: "Media Gallery — AmbassadorsCloud" },
       { name: "description", content: "Listen to music and watch videos from the JKUSDA Ambassadors Choir." },
+      { property: "og:title", content: "Media Gallery — AmbassadorsCloud" },
+      { property: "og:description", content: "Listen to music and watch videos from the JKUSDA Ambassadors Choir." },
+      { property: "og:url", content: "https://ambassador-melody-cloud.lovable.app/gallery" },
+    ],
+    links: [{ rel: "canonical", href: "https://ambassador-melody-cloud.lovable.app/gallery" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Media Gallery — AmbassadorsCloud",
+          description: "Approved music and video performances from the JKUSDA Ambassadors Choir.",
+          url: "https://ambassador-melody-cloud.lovable.app/gallery",
+        }),
+      },
     ],
   }),
 });
