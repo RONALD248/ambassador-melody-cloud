@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /my-uploads
+Disallow: /profile
+Disallow: /upload
+Disallow: /private-gallery
+Disallow: /documents
+
+Sitemap: https://ambassador-melody-cloud.lovable.app/sitemap.xml
