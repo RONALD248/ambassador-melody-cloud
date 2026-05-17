@@ -38,7 +38,15 @@ export const Route = createFileRoute("/events")({
         content:
           "Upcoming choir practices, performances, and tour dates for the JKUSDA Ambassadors Choir.",
       },
+      { property: "og:title", content: "Events Calendar — AmbassadorsCloud" },
+      {
+        property: "og:description",
+        content:
+          "Upcoming choir practices, performances, and tour dates for the JKUSDA Ambassadors Choir.",
+      },
+      { property: "og:url", content: "https://ambassador-melody-cloud.lovable.app/events" },
     ],
+    links: [{ rel: "canonical", href: "https://ambassador-melody-cloud.lovable.app/events" }],
   }),
 });
 
