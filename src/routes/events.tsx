@@ -320,7 +320,7 @@ function EventCard({
         )}
       </div>
       {canDelete && (
-        <Button variant="ghost" size="icon" onClick={() => onDelete(event.id)}>
+        <Button variant="ghost" size="icon" onClick={() => onDelete(event.id)} aria-label={`Delete event ${event.title}`}>
           <Trash2 className="h-4 w-4 text-destructive" />
         </Button>
       )}
