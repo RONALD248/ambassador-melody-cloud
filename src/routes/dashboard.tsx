@@ -83,6 +83,7 @@ function DashboardPage() {
           </div>
 
           {/* Stats */}
+          <h2 className="sr-only">Upload statistics</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {statCards.map((stat) => (
               <div key={stat.label} className="rounded-xl border border-border bg-card p-5">
@@ -96,7 +97,8 @@ function DashboardPage() {
           </div>
 
           {/* Quick Actions */}
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <h2 className="mt-8 font-display text-xl font-semibold text-foreground">Quick actions</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <Link to="/upload" className="group rounded-xl border border-border bg-card p-5 transition-all hover:border-accent/30 hover:shadow-md">
               <Upload className="h-8 w-8 text-accent" />
               <h3 className="mt-3 font-display font-semibold text-foreground">Upload Content</h3>
