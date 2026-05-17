@@ -61,7 +61,7 @@ export function Header() {
                 <User className="h-4 w-4" />
                 <span>{profile?.display_name || "Member"}</span>
               </Link>
-              <Button variant="ghost" size="sm" onClick={logout}>
+              <Button variant="ghost" size="sm" onClick={logout} aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
