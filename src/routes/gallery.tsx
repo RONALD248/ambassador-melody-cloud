@@ -108,6 +108,7 @@ function GalleryPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 pr-9"
+                aria-label="Search media"
               />
               {search && (
                 <button
