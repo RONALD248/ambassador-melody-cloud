@@ -30,7 +30,11 @@ function getPreviewKind(path: string): PreviewKind {
 export const Route = createFileRoute("/documents")({
   component: DocumentsPage,
   head: () => ({
-    meta: [{ title: "Documents — AmbassadorsCloud" }],
+    meta: [
+      { title: "Documents — AmbassadorsCloud" },
+      { name: "description", content: "Browse, preview, and download choir documents shared with JKUSDA Ambassadors Choir members." },
+      { name: "robots", content: "noindex" },
+    ],
   }),
 });
 
@@ -102,6 +106,7 @@ function DocumentsPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9 pr-9"
+              aria-label="Search documents"
             />
             {search && (
               <button

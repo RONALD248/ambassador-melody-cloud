@@ -37,13 +37,10 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
-      { name: "description", content: "Digital platform for the JKUSDA Ambassadors Choir community. Share music, photos, and videos." },
-      { property: "og:title", content: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
-      { property: "og:description", content: "Digital platform for the JKUSDA Ambassadors Choir community. Share music, photos, and videos." },
+      { title: "AmbassadorsCloud" },
+      { name: "description", content: "Digital platform for the JKUSDA Ambassadors Choir community." },
+      { property: "og:site_name", content: "AmbassadorsCloud" },
       { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
-      { name: "twitter:description", content: "Digital platform for the JKUSDA Ambassadors Choir community. Share music, photos, and videos." },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ac1342cc-f8b5-42af-831f-1490d1c7a739" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/ac1342cc-f8b5-42af-831f-1490d1c7a739" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -57,6 +54,28 @@ export const Route = createRootRoute({
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "icon", href: "/favicon.ico" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
+    ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              name: "JKUSDA Ambassadors Choir",
+              alternateName: "AmbassadorsCloud",
+              url: "https://ambassador-melody-cloud.lovable.app",
+              logo: "https://ambassador-melody-cloud.lovable.app/icon-512.png",
+            },
+            {
+              "@type": "WebSite",
+              name: "AmbassadorsCloud",
+              url: "https://ambassador-melody-cloud.lovable.app",
+            },
+          ],
+        }),
+      },
     ],
   }),
   shellComponent: RootShell,

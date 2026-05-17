@@ -1,0 +1,18 @@
+# AmbassadorsCloud
+
+> Digital home of the JKUSDA Ambassadors Choir. Members share music, photos, videos, and documents; the public can listen to performances and browse the events calendar.
+
+AmbassadorsCloud is the official platform for the JKUSDA Ambassadors Choir community. Approved music and videos are public; photos and documents are reserved for choir members.
+
+## Pages
+
+- [Home](/): Overview of the choir and the platform.
+- [Media Gallery](/gallery): Public approved music and video performances.
+- [Events](/events): Calendar of practices, performances, and tour dates.
+- [Sign In](/login): Member sign in.
+- [Join Choir](/register): New member registration.
+
+## Optional
+
+- [Member Dashboard](/dashboard): Authenticated member overview.
+- [Upload](/upload): Members upload photos, music, videos, and documents for admin approval.

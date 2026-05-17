@@ -61,7 +61,7 @@ export function Header() {
                 <User className="h-4 w-4" />
                 <span>{profile?.display_name || "Member"}</span>
               </Link>
-              <Button variant="ghost" size="sm" onClick={logout}>
+              <Button variant="ghost" size="sm" onClick={logout} aria-label="Sign out">
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
@@ -78,7 +78,12 @@ export function Header() {
         </div>
 
         {/* Mobile menu toggle */}
-        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)}>
+        <button
+          className="md:hidden"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+        >
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>

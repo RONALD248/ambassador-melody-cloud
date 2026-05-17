@@ -12,7 +12,11 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
       { name: "description", content: "The digital home of the JKUSDA Ambassadors Choir. Share music, photos, and videos with the community." },
+      { property: "og:title", content: "AmbassadorsCloud — JKUSDA Ambassadors Choir" },
+      { property: "og:description", content: "The digital home of the JKUSDA Ambassadors Choir. Share music, photos, and videos with the community." },
+      { property: "og:url", content: "https://ambassador-melody-cloud.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://ambassador-melody-cloud.lovable.app/" }],
   }),
 });
 

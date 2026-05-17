@@ -102,7 +102,7 @@ function MyUploadsPage() {
                         item.status === "approved" ? "text-success" : item.status === "rejected" ? "text-destructive" : "text-warning"
                       }`}>{item.status}</span>
                     </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(item.id, item.file_path)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => handleDelete(item.id, item.file_path)} aria-label={`Delete ${item.title}`}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
