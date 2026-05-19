@@ -80,6 +80,9 @@ function validateRoute(filePath) {
     return;
   }
 
+  // Skip routes explicitly marked noindex (members-only pages).
+  if (/name:\s*["']robots["'][^}]*content:\s*["'`][^"'`]*noindex/.test(head)) return;
+
   const checks = [
     { name: "title", re: /\btitle\s*:/ },
     { name: "description", re: /name:\s*["']description["']/ },
