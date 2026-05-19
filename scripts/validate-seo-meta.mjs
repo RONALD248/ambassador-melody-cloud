@@ -92,10 +92,14 @@ function validateRoute(filePath) {
     if (!c.re.test(head)) errors.push(`${name}: missing ${c.name}`);
   }
 
-  // Origin consistency on canonical / og:url
-  const urlMatches = head.match(/https?:\/\/[^"'`\s]+/g) ?? [];
-  for (const u of urlMatches) {
-    if (!u.startsWith(CANONICAL_ORIGIN)) {
+  // Origin consistency on canonical / og:url only
+  const targeted = [
+    ...head.matchAll(/property:\s*["']og:url["'][^}]*content:\s*["'`]([^"'`]+)["'`]/g),
+    ...head.matchAll(/rel:\s*["']canonical["'][^}]*href:\s*["'`]([^"'`]+)["'`]/g),
+  ];
+  for (const m of targeted) {
+    const u = m[1];
+    if (!u.startsWith(CANONICAL_ORIGIN) && !u.startsWith("/")) {
       warnings.push(`${name}: non-canonical URL "${u}" (expected ${CANONICAL_ORIGIN})`);
     }
   }
