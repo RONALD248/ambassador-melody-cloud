@@ -80,6 +80,22 @@ function AdminPage() {
     setContent((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const handleApproveAll = async () => {
+    if (content.length === 0) return;
+    if (!confirm(`Approve all ${content.length} pending uploads?`)) return;
+    const ids = content.map((c) => c.id);
+    await supabase.from("content").update({ status: "approved" }).in("id", ids);
+    setContent([]);
+  };
+
+  const handleRejectAll = async () => {
+    if (content.length === 0) return;
+    if (!confirm(`Reject all ${content.length} pending uploads?`)) return;
+    const ids = content.map((c) => c.id);
+    await supabase.from("content").update({ status: "rejected" }).in("id", ids);
+    setContent([]);
+  };
+
   if (isLoading || !isAdmin) return null;
 
   const tabs = [
@@ -111,6 +127,23 @@ function AdminPage() {
               </button>
             ))}
           </div>
+
+          {/* Bulk actions for pending */}
+          {tab === "pending" && content.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card p-3">
+              <p className="text-sm text-muted-foreground">
+                {content.length} pending {content.length === 1 ? "upload" : "uploads"}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="success" size="sm" onClick={handleApproveAll}>
+                  <CheckCircle className="mr-1 h-3.5 w-3.5" /> Approve all
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleRejectAll}>
+                  <XCircle className="mr-1 h-3.5 w-3.5" /> Reject all
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Content List */}
           {loading ? (
