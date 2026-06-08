@@ -80,6 +80,22 @@ function AdminPage() {
     setContent((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const handleApproveAll = async () => {
+    if (content.length === 0) return;
+    if (!confirm(`Approve all ${content.length} pending uploads?`)) return;
+    const ids = content.map((c) => c.id);
+    await supabase.from("content").update({ status: "approved" }).in("id", ids);
+    setContent([]);
+  };
+
+  const handleRejectAll = async () => {
+    if (content.length === 0) return;
+    if (!confirm(`Reject all ${content.length} pending uploads?`)) return;
+    const ids = content.map((c) => c.id);
+    await supabase.from("content").update({ status: "rejected" }).in("id", ids);
+    setContent([]);
+  };
+
   if (isLoading || !isAdmin) return null;
 
   const tabs = [
